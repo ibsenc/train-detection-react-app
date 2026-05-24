@@ -1,13 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BUCKET="train-detection-ui-833495381683-us-west-2-an"
+BUCKET="midnighttraintacoma.com"
 DEPLOY_DIR="deployments"
 
-# Guard: abort if there are uncommitted changes
+# Guard: warn if there are uncommitted changes
 if ! git diff --quiet || ! git diff --cached --quiet; then
-  echo "Error: uncommitted changes detected. Commit or stash them before deploying."
-  exit 1
+  echo "Warning: uncommitted changes detected."
+  read -r -p "Continue anyway? (y/n) " CONFIRM
+  if [ "$CONFIRM" != "y" ]; then
+    echo "Aborted."
+    exit 1
+  fi
 fi
 
 # Guard: abort if not on main
@@ -40,5 +44,5 @@ cp -r dist/. "$ARCHIVE/"
 #   aws s3 sync "$ARCHIVE/" "s3://train-detection-ui-backups/$TIMESTAMP/" --delete
 
 echo ""
-echo "Done. Deployed $SHA, archived at $ARCHIVE/"
-echo "To roll back to this build later: aws s3 sync $ARCHIVE/ s3://$BUCKET --delete"
+echo -e "\033[0;32mSuccessfully deployed $SHA, archived at $ARCHIVE/\033[0m"
+echo "To roll back to this build later: aws s3 sync $ARCHIVE/ s3://$BUCKET --delete --profile train-detection-deploy"

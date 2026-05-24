@@ -11,7 +11,7 @@ A recording device captures audio overnight (11PM–7AM) from indoors 2 blocks f
 - **Audio Playback** — listen to the audio clip for any detection
 - **Review Buttons** — manually confirm or reject whether a detection was actually a train
 
-Visit the website: http://train-detection-ui-833495381683-us-west-2-an.s3-website-us-west-2.amazonaws.com/
+Visit the website: http://www.midnighttraintacoma.com
 
 ---
 
@@ -64,17 +64,12 @@ The script will abort if you have uncommitted changes or are not on `main`. Once
 
 > **Note:** Archives in `deployments/` are local only — if this machine is lost, rollback history is gone. Consider syncing archives to a second S3 bucket in the future (see the TODO in `deploy.sh`).
 
-> **First-time setup:** The current live S3 build is not yet archived locally. To save it before your first deploy, run:
-> ```bash
-> aws s3 sync s3://train-detection-ui-833495381683-us-west-2-an/ deployments/pre-script/ --profile train-detection-deploy
-> ```
-
 ### Manual rollback
 
 To restore a previous build, pass its archive folder to `aws s3 sync`:
 
 ```bash
-aws s3 sync deployments/<timestamp>/ s3://train-detection-ui-833495381683-us-west-2-an --delete --profile train-detection-deploy
+aws s3 sync deployments/<timestamp>/ s3://midnighttraintacoma.com --delete --profile train-detection-deploy
 ```
 
 List available archives:
