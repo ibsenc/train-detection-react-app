@@ -34,7 +34,7 @@
   max-width: 1400px;
   margin: 0 auto;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 12px;
 }
 
@@ -43,6 +43,15 @@
   flex-direction: row;
   align-items: center;
   gap: 16px;
+}
+
+.header-tagline {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 2px 0 6px;
 }
 
 .header-subtitles {
@@ -72,9 +81,9 @@
 }
 
 .header-icon {
-  font-size: 2rem;
-  line-height: 1;
-  margin-top: 2px;
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
 }
 
 .app-header h1 {
@@ -94,12 +103,83 @@
   gap: 24px;
 }
 
+.app-footer {
+  margin-top: 16px;
+  padding: 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  border-top: 1px solid var(--border);
+}
+
+.footer-credit {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.footer-links {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+}
+
+.footer-links a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.footer-links a:hover {
+  text-decoration: underline;
+}
+
+.footer-sep {
+  color: var(--text-muted);
+}
+
+.footer-copy {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+
 /* ── Shared card ── */
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 20px;
+}
+
+/* ── Global time range selector ── */
+.global-time-range {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 20px;
+}
+
+.global-time-range__presets {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.global-time-range__custom {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-end;
+  margin-top: 12px;
+}
+
+.custom-time-error {
+  width: 100%;
+  margin: 4px 0 0;
+  font-size: 0.8rem;
+  color: var(--red);
 }
 
 /* ── Section title ── */
@@ -329,6 +409,12 @@
   color: var(--accent);
 }
 
+.preset-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
 .query-inputs {
   display: flex;
   flex-wrap: wrap;
@@ -386,7 +472,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  max-height: 420px;
+  max-height: 800px;
   overflow-y: auto;
   padding-right: 4px;
 }

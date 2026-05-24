@@ -2,17 +2,19 @@ import type { Detection, DetectionsResponse, Stats } from './types';
 
 const BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? 'http://localhost:3000';
 
-export async function fetchStats(source?: string): Promise<Stats> {
+export async function fetchStats(source?: string, start?: string, end?: string): Promise<Stats> {
   const params = new URLSearchParams();
   if (source) params.set('source', source);
+  if (start) params.set('start', start);
+  if (end) params.set('end', end);
   const qs = params.toString();
   const res = await fetch(`${BASE_URL}/api/detections/stats${qs ? `?${qs}` : ''}`);
   if (!res.ok) throw new Error('Failed to fetch stats');
   return res.json() as Promise<Stats>;
 }
 
-export async function fetchLatest(confirmedOnly = false): Promise<Detection> {
-  const res = await fetch(`${BASE_URL}/api/detections/latest?confirmed_only=${confirmedOnly}`);
+export async function fetchLatest(): Promise<Detection> {
+  const res = await fetch(`${BASE_URL}/api/detections/latest?confirmed_only=true`);
   if (res.status === 404) throw new Error('No detections found');
   if (!res.ok) throw new Error('Failed to fetch latest detection');
   return res.json() as Promise<Detection>;

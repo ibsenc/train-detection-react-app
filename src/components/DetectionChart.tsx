@@ -23,16 +23,50 @@ interface ChartPoint {
   source: string;
 }
 
-const DAYS_OPTIONS = [1, 7, 30] as const;
-
 function formatXTick(ms: number, days: number): string {
   if (days <= 1) {
-    return new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit' }).format(new Date(ms));
+    return new Intl.DateTimeFormat(undefined, { hour: 'numeric' }).format(new Date(ms));
   }
   if (days <= 7) {
-    return new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(ms));
+    return new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric', hour: 'numeric' }).format(new Date(ms));
   }
   return new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' }).format(new Date(ms));
+}
+
+function generateTicks(startMs: number, endMs: number, days: number): number[] {
+  const ticks: number[] = [];
+
+  if (days <= 1) {
+    // Every hour, anchored to local hour boundaries
+    const d = new Date(startMs);
+    d.setMinutes(0, 0, 0);
+    let t = d.getTime();
+    if (t < startMs) t += 60 * 60 * 1000;
+    while (t <= endMs) { ticks.push(t); t += 60 * 60 * 1000; }
+  } else if (days <= 7) {
+    // Every 12 hours, anchored to local midnight → gives 12AM and 12PM ticks
+    const d = new Date(startMs);
+    d.setHours(0, 0, 0, 0);
+    let t = d.getTime();
+    const interval = 12 * 60 * 60 * 1000;
+    while (t <= endMs) { if (t >= startMs) ticks.push(t); t += interval; }
+  } else if (days <= 14) {
+    // Every 24 hours, anchored to local midnight → one tick per day
+    const d = new Date(startMs);
+    d.setHours(0, 0, 0, 0);
+    let t = d.getTime();
+    const interval = 24 * 60 * 60 * 1000;
+    while (t <= endMs) { if (t >= startMs) ticks.push(t); t += interval; }
+  } else {
+    // Every 2 days, anchored to local midnight
+    const d = new Date(startMs);
+    d.setHours(0, 0, 0, 0);
+    let t = d.getTime();
+    const interval = 48 * 60 * 60 * 1000;
+    while (t <= endMs) { if (t >= startMs) ticks.push(t); t += interval; }
+  }
+
+  return ticks;
 }
 
 function timeAgo(iso: string): string {
@@ -86,11 +120,15 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
   );
 }
 
-export default function DetectionChart() {
+interface DetectionChartProps {
+  start: string | undefined;
+  end: string | undefined;
+}
+
+export default function DetectionChart({ start, end }: DetectionChartProps) {
   const [detections, setDetections] = useState<Detection[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [days, setDays] = useState<(typeof DAYS_OPTIONS)[number]>(7);
   const [selected, setSelected] = useState<Detection | null>(null);
 
   useEffect(() => {
@@ -98,14 +136,12 @@ export default function DetectionChart() {
     setLoading(true);
     setError(null);
     setSelected(null);
-    const end = new Date();
-    const start = new Date(end.getTime() - days * 24 * 60 * 60 * 1000);
-    fetchDetections({ start: start.toISOString(), end: end.toISOString(), limit: 500 })
+    fetchDetections({ start, end, limit: 500 })
       .then(r => { if (!cancelled) setDetections(r.data); })
       .catch((e: Error) => { if (!cancelled) setError(e.message); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [days]);
+  }, [start, end]);
 
   function handleDotClick(data: unknown) {
     const point = data as ChartPoint;
@@ -139,23 +175,20 @@ export default function DetectionChart() {
     else normal.push(point);
   }
 
-  const tickFormatter = (ms: number) => formatXTick(ms, days);
+  const endMs = end ? new Date(end).getTime() : Date.now();
+  const startMs = start ? new Date(start).getTime() : undefined;
+  const dataMinMs = detections.length > 0
+    ? detections.reduce((min, d) => Math.min(min, new Date(d.timestamp).getTime()), Infinity)
+    : undefined;
+  const effectiveStartMs = startMs ?? dataMinMs;
+  const rangeDays = effectiveStartMs !== undefined ? (endMs - effectiveStartMs) / (24 * 60 * 60 * 1000) : 365;
+  const ticks = effectiveStartMs !== undefined ? generateTicks(effectiveStartMs, endMs, rangeDays) : undefined;
+  const tickFormatter = (ms: number) => formatXTick(ms, rangeDays);
 
   return (
     <div className="chart-panel card">
       <div className="chart-panel__header">
-        <h2 className="section-title">Detection History</h2>
-        <div className="range-buttons">
-          {DAYS_OPTIONS.map(d => (
-            <button
-              key={d}
-              className={`range-btn${days === d ? ' active' : ''}`}
-              onClick={() => setDays(d)}
-            >
-              {d === 1 ? '24h' : `${d}d`}
-            </button>
-          ))}
-        </div>
+        <h2 className="section-title">Event History</h2>
       </div>
 
       {loading && <div className="panel-placeholder">Loading chart…</div>}
@@ -172,15 +205,15 @@ export default function DetectionChart() {
                 <XAxis
                   dataKey="time"
                   type="number"
-                  domain={['dataMin', 'dataMax']}
+                  domain={[startMs ?? 'dataMin', endMs]}
+                  ticks={ticks}
                   tickFormatter={tickFormatter}
                   scale="time"
                   name="Time"
                   tick={{ fontSize: 11, fill: '#94a3b8' }}
-                  tickCount={6}
-                  angle={-25}
+                  angle={-45}
                   textAnchor="end"
-                  height={50}
+                  height={60}
                 />
                 <YAxis
                   dataKey="decibels"
