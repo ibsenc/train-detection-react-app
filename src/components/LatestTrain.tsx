@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { fetchLatest } from '../api';
+import { fetchLatestConfirmed } from '../api';
 import AudioButton from './AudioButton';
 import type { Detection } from '../types';
 
@@ -42,7 +42,7 @@ export default function LatestTrain() {
 
   useEffect(() => {
     let cancelled = false;
-    fetchLatest()
+    fetchLatestConfirmed()
       .then(data => { if (!cancelled) setDetection(data); })
       .catch((e: Error) => { if (!cancelled) setError(e.message); })
       .finally(() => { if (!cancelled) setLoading(false); });

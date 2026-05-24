@@ -13,7 +13,7 @@ export async function fetchStats(source?: string, start?: string, end?: string):
   return res.json() as Promise<Stats>;
 }
 
-export async function fetchLatest(): Promise<Detection> {
+export async function fetchLatestConfirmed(): Promise<Detection> {
   const res = await fetch(`${BASE_URL}/api/detections/latest?confirmed_only=true`);
   if (res.status === 404) throw new Error('No detections found');
   if (!res.ok) throw new Error('Failed to fetch latest detection');

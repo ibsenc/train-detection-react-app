@@ -393,28 +393,6 @@
   margin-bottom: 16px;
 }
 
-.preset-btn {
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  color: var(--text-muted);
-  border-radius: 6px;
-  padding: 5px 14px;
-  font-size: 0.8rem;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.preset-btn:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-}
-
-.preset-btn.active {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #fff;
-}
-
 .query-inputs {
   display: flex;
   flex-wrap: wrap;

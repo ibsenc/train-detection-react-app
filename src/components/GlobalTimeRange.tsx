@@ -53,8 +53,9 @@ export default function GlobalTimeRange({ value, onChange }: Props) {
   const [customError, setCustomError] = useState<string | null>(null);
 
   function handlePreset(preset: Preset) {
+    setCustomError(null);
     if (preset === 'custom') {
-      onChange({ preset: 'custom', start: undefined, end: undefined });
+      onChange({ ...value, preset: 'custom' });
     } else {
       onChange(makePresetRange(preset));
     }
