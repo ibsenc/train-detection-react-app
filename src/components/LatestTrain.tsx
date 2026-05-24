@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { fetchLatest } from '../api';
+import { fetchLatestConfirmed } from '../api';
 import AudioButton from './AudioButton';
 import type { Detection } from '../types';
 
@@ -42,7 +42,7 @@ export default function LatestTrain() {
 
   useEffect(() => {
     let cancelled = false;
-    fetchLatest(false)
+    fetchLatestConfirmed()
       .then(data => { if (!cancelled) setDetection(data); })
       .catch((e: Error) => { if (!cancelled) setError(e.message); })
       .finally(() => { if (!cancelled) setLoading(false); });
@@ -51,7 +51,7 @@ export default function LatestTrain() {
 
   return (
     <div className="latest-train card">
-      <h2 className="section-title">Last Train Detected</h2>
+      <h2 className="section-title">Last Confirmed Train</h2>
       {loading && <p className="panel-placeholder">Loading…</p>}
       {(error || (!loading && !detection)) && (
         <p className="no-data">No detections found</p>

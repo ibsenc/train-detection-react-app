@@ -1,16 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { fetchDetections } from '../api';
 import AudioButton from './AudioButton';
 import ReviewButtons from './ReviewButtons';
 import type { Detection, DetectionsResponse } from '../types';
-
-function toLocalInput(date: Date): string {
-  const pad = (n: number) => String(n).padStart(2, '0');
-  return (
-    `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}` +
-    `T${pad(date.getHours())}:${pad(date.getMinutes())}`
-  );
-}
 
 function formatDateTime(iso: string): string {
   return new Intl.DateTimeFormat(undefined, {
@@ -31,47 +23,26 @@ function statusClass(d: Detection): string {
   return 'status-suspected';
 }
 
-const PRESETS = [
-  { label: 'Last Hour', hours: 1 },
-  { label: 'Last 24h', hours: 24 },
-  { label: 'Last 7 Days', hours: 168 },
-  { label: 'Last 30 Days', hours: 720 },
-];
+interface Props {
+  start: string | undefined;
+  end: string | undefined;
+}
 
-export default function TimeRangeQuery() {
-  const now = new Date();
-  const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-
-  const [start, setStart] = useState(toLocalInput(yesterday));
-  const [end, setEnd] = useState(toLocalInput(now));
+export default function TimeRangeQuery({ start, end }: Props) {
   const [results, setResults] = useState<DetectionsResponse | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  function applyPreset(hours: number) {
-    const endDate = new Date();
-    const startDate = new Date(endDate.getTime() - hours * 60 * 60 * 1000);
-    setStart(toLocalInput(startDate));
-    setEnd(toLocalInput(endDate));
-    setResults(null);
-  }
-
-  async function handleQuery() {
+  useEffect(() => {
+    let cancelled = false;
     setLoading(true);
     setError(null);
-    try {
-      const data = await fetchDetections({
-        start: new Date(start).toISOString(),
-        end: new Date(end).toISOString(),
-        limit: 200,
-      });
-      setResults(data);
-    } catch (e) {
-      setError((e as Error).message);
-    } finally {
-      setLoading(false);
-    }
-  }
+    fetchDetections({ start, end, limit: 200 })
+      .then(data => { if (!cancelled) setResults(data); })
+      .catch((e: Error) => { if (!cancelled) setError(e.message); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [start, end]);
 
   const trains = results?.data.filter(d => d.is_suspected_train) ?? [];
   const confirmed = trains.filter(d => d.is_confirmed_train === true);
@@ -84,41 +55,12 @@ export default function TimeRangeQuery() {
 
   return (
     <div className="query-panel card">
-      <h2 className="section-title">Query Time Range</h2>
+      <h2 className="section-title">Events</h2>
 
-      <div className="query-presets">
-        {PRESETS.map(p => (
-          <button key={p.label} className="preset-btn" onClick={() => applyPreset(p.hours)}>
-            {p.label}
-          </button>
-        ))}
-      </div>
-
-      <div className="query-inputs">
-        <label className="input-group">
-          <span>From</span>
-          <input
-            type="datetime-local"
-            value={start}
-            onChange={e => setStart(e.target.value)}
-          />
-        </label>
-        <label className="input-group">
-          <span>To</span>
-          <input
-            type="datetime-local"
-            value={end}
-            onChange={e => setEnd(e.target.value)}
-          />
-        </label>
-        <button className="query-btn" onClick={handleQuery} disabled={loading}>
-          {loading ? 'Querying…' : 'Query'}
-        </button>
-      </div>
-
+      {loading && <div className="panel-placeholder">Loading…</div>}
       {error && <div className="panel-error">{error}</div>}
 
-      {results && (
+      {!loading && !error && results && (
         <div className="query-results">
           <div className="query-summary">
             {trains.length === 0 ? (

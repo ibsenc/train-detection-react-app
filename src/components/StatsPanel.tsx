@@ -17,19 +17,26 @@ function StatCard({ label, value, highlight }: StatCardProps) {
   );
 }
 
-export default function StatsPanel() {
+interface StatsPanelProps {
+  start: string | undefined;
+  end: string | undefined;
+}
+
+export default function StatsPanel({ start, end }: StatsPanelProps) {
   const [stats, setStats] = useState<Stats | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
-    fetchStats()
+    setLoading(true);
+    setError(null);
+    fetchStats(undefined, start, end)
       .then(data => { if (!cancelled) setStats(data); })
       .catch((e: Error) => { if (!cancelled) setError(e.message); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, []);
+  }, [start, end]);
 
   if (loading) return <div className="panel-placeholder">Loading stats…</div>;
   if (error) return <div className="panel-error">Could not load stats: {error}</div>;
@@ -41,10 +48,8 @@ export default function StatsPanel() {
       <StatCard label="Confirmed Trains" value={stats.confirmed_trains} highlight />
       <StatCard label="Non-Train Events" value={stats.confirmed_false_positives} />
       <StatCard label="Not Reviewed or Unknown" value={stats.unreviewed_suspected} />
-      <StatCard label="Last 24 h" value={stats.suspected_last_24h} />
-      <StatCard label="Last 7 Days" value={stats.suspected_last_7d} />
-      <StatCard label="Avg dB" value={`${parseFloat(stats.avg_decibels).toFixed(1)} dB`} />
-      <StatCard label="Max dB" value={`${parseFloat(stats.max_decibels).toFixed(1)} dB`} />
+      <StatCard label="Avg dB" value={isNaN(parseFloat(stats.avg_decibels)) ? '0.0 dB' : `${parseFloat(stats.avg_decibels).toFixed(1)} dB`} />
+      <StatCard label="Max dB" value={isNaN(parseFloat(stats.max_decibels)) ? '0.0 dB' : `${parseFloat(stats.max_decibels).toFixed(1)} dB`} />
     </section>
   );
 }

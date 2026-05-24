@@ -23,8 +23,6 @@ export interface Stats {
   confirmed_trains: number;
   confirmed_false_positives: number;
   unreviewed_suspected: number;
-  suspected_last_24h: number;
-  suspected_last_7d: number;
   last_suspected_at: string | null;
   last_confirmed_at: string | null;
   avg_decibels: string;
