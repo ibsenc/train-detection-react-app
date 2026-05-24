@@ -175,7 +175,10 @@ export default function DetectionChart({ start, end }: DetectionChartProps) {
     else normal.push(point);
   }
 
-  const endMs = end ? new Date(end).getTime() : Date.now();
+  const dataMaxMs = detections.length > 0
+    ? detections.reduce((max, d) => Math.max(max, new Date(d.timestamp).getTime()), -Infinity)
+    : undefined;
+  const endMs = end ? new Date(end).getTime() : (dataMaxMs ?? Date.now());
   const startMs = start ? new Date(start).getTime() : undefined;
   const dataMinMs = detections.length > 0
     ? detections.reduce((min, d) => Math.min(min, new Date(d.timestamp).getTime()), Infinity)

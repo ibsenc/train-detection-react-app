@@ -51,12 +51,15 @@ export default function GlobalTimeRange({ value, onChange }: Props) {
   );
   const [customEnd, setCustomEnd] = useState(toLocalInput(now));
   const [customError, setCustomError] = useState<string | null>(null);
+  const [pendingCustom, setPendingCustom] = useState(value.preset === 'custom');
 
   function handlePreset(preset: Preset) {
     setCustomError(null);
     if (preset === 'custom') {
-      onChange({ ...value, preset: 'custom' });
+      setPendingCustom(true);
+      // Don't call onChange yet — wait for Apply
     } else {
+      setPendingCustom(false);
       onChange(makePresetRange(preset));
     }
   }
@@ -77,6 +80,7 @@ export default function GlobalTimeRange({ value, onChange }: Props) {
       return;
     }
     setCustomError(null);
+    setPendingCustom(false);
     onChange({
       preset: 'custom',
       start: new Date(customStart).toISOString(),
@@ -84,20 +88,23 @@ export default function GlobalTimeRange({ value, onChange }: Props) {
     });
   }
 
+  const showCustom = pendingCustom || value.preset === 'custom';
+  const activePreset = pendingCustom ? 'custom' : value.preset;
+
   return (
     <div className="global-time-range">
       <div className="global-time-range__presets">
         {PRESETS.map(p => (
           <button
             key={p.preset}
-            className={`range-btn${value.preset === p.preset ? ' active' : ''}`}
+            className={`range-btn${activePreset === p.preset ? ' active' : ''}`}
             onClick={() => handlePreset(p.preset)}
           >
             {p.label}
           </button>
         ))}
       </div>
-      {value.preset === 'custom' && (
+      {showCustom && (
         <div className="global-time-range__custom">
           <label className="input-group">
             <span>From</span>
