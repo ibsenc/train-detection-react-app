@@ -51,23 +51,37 @@ To point to a different backend, update `.env.production` and rebuild.
 
 ## Production Deployment
 
-### 1. Build
+Use the deploy script to build, archive, and push to S3 in one step:
 
 ```bash
-npm run build
+./deploy.sh
 ```
 
-Output is written to `dist/`.
+The script will abort if you have uncommitted changes or are not on `main`. Once those checks pass, it will:
+1. Run `npm run build`
+2. Sync `dist/` to the S3 bucket, deleting stale files
+3. Copy the deployed build to `deployments/<timestamp>/` as a local archive
 
-### 2. Upload to S3
+> **Note:** Archives in `deployments/` are local only — if this machine is lost, rollback history is gone. Consider syncing archives to a second S3 bucket in the future (see the TODO in `deploy.sh`).
 
-Upload the **contents** of `dist/` (not the `dist/` folder itself) to the S3 bucket and delete the old contents. Do this in the console for now, or later we could use the AWS CLI command (not tested):
+> **First-time setup:** The current live S3 build is not yet archived locally. To save it before your first deploy, run:
+> ```bash
+> aws s3 sync s3://train-detection-ui-833495381683-us-west-2-an/ deployments/pre-script/ --profile train-detection-deploy
+> ```
+
+### Manual rollback
+
+To restore a previous build, pass its archive folder to `aws s3 sync`:
 
 ```bash
-aws s3 sync dist/ s3://train-detection-ui-833495381683-us-west-2-an --delete
+aws s3 sync deployments/<timestamp>/ s3://train-detection-ui-833495381683-us-west-2-an --delete --profile train-detection-deploy
 ```
 
-> The `--delete` flag removes files from S3 that no longer exist in the build output. Omit it if you want to preserve unrelated files in the bucket.
+List available archives:
+
+```bash
+ls deployments/
+```
 
 ### 3. Verify
 
