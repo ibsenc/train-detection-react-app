@@ -38,11 +38,17 @@
   gap: 12px;
 }
 
-.header-text {
+.header-title-row {
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
+}
+
+.header-title-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .header-tagline {
@@ -241,6 +247,116 @@
 
 @media (max-width: 860px) {
   .main-grid { grid-template-columns: 1fr; }
+
+  .app-header {
+    padding: 14px 16px;
+    transition: padding 0.22s ease;
+  }
+
+  .header-inner {
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    transition: gap 0.22s ease;
+  }
+
+  .header-title-row {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 56px;
+    transition: gap 0.22s ease, min-height 0.22s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  .header-title-text {
+    align-items: center;
+    text-align: center;
+    min-height: 36px;
+    justify-content: center;
+    transition: opacity 0.22s ease, min-height 0.22s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  .header-subtitles {
+    border-left: none;
+    padding-left: 0;
+    border-top: 1px solid var(--border);
+    padding-top: 8px;
+    width: 100%;
+    transition: opacity 0.22s ease, max-height 0.22s ease, margin 0.22s ease, padding 0.22s ease, border-color 0.22s ease;
+    max-height: 120px;
+    opacity: 1;
+    overflow: hidden;
+  }
+
+  .app-header h1 {
+    font-size: 1.3rem;
+    transition: font-size 0.22s ease;
+  }
+
+  .header-tagline {
+    font-size: 0.8rem;
+    line-height: 1.2;
+    transition: opacity 0.22s ease, max-height 0.22s ease, margin 0.22s ease, transform 0.22s ease;
+    max-height: 28px;
+    overflow: hidden;
+    transform: translateY(0);
+  }
+
+  .header-icon {
+    width: 30px;
+    height: 30px;
+    transform: scale(1);
+    transform-origin: center;
+    transition: transform 0.22s ease;
+  }
+
+  .app-header--collapsed {
+    padding: 8px 16px;
+  }
+
+  .app-header--collapsed .header-inner {
+    gap: 2px;
+  }
+
+  .app-header--collapsed .header-title-row {
+    flex-direction: row;
+    gap: 6px;
+    min-height: 36px;
+  }
+
+  .app-header--collapsed .header-title-text {
+    min-height: 28px;
+  }
+
+  .app-header--collapsed .header-icon {
+    transform: scale(0.73);
+  }
+
+  .app-header--collapsed h1 {
+    font-size: 1.08rem;
+  }
+
+  .app-header--collapsed .header-tagline {
+    opacity: 0;
+    max-height: 0;
+    max-width: 0;
+    width: 0;
+    margin: 0;
+    padding: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    transform: translateY(-4px);
+  }
+
+  .app-header--collapsed .header-subtitles {
+    opacity: 0;
+    max-height: 0;
+    margin: 0;
+    padding-top: 0;
+    border-top-color: transparent;
+    pointer-events: none;
+  }
 }
 
 /* ── Latest Train ── */

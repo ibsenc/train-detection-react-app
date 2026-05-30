@@ -11,7 +11,7 @@ A recording device captures audio overnight (11PM–7AM) from indoors 2 blocks f
 - **Audio Playback** — listen to the audio clip for any detection
 - **Review Buttons** — manually confirm or reject whether a detection was actually a train
 
-Visit the website: http://www.midnighttraintacoma.com
+Visit the website: https://www.midnighttraintacoma.com
 
 ---
 
