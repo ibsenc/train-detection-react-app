@@ -8,7 +8,7 @@ import type { TimeRange } from './components/GlobalTimeRange';
 import './App.css';
 
 function App() {
-  const [timeRange, setTimeRange] = useState<TimeRange>(() => makePresetRange('7d'));
+  const [timeRange, setTimeRange] = useState<TimeRange>(() => makePresetRange('24h'));
   const [isHeaderCollapsed, setIsHeaderCollapsed] = useState(false);
   const headerCollapsedRef = useRef(false);
 
