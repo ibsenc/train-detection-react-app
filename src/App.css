@@ -38,11 +38,17 @@
   gap: 12px;
 }
 
-.header-text {
+.header-title-row {
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
+}
+
+.header-title-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .header-tagline {
@@ -241,6 +247,107 @@
 
 @media (max-width: 860px) {
   .main-grid { grid-template-columns: 1fr; }
+
+  .app-header {
+    padding: 14px 16px;
+    transition: padding 0.22s ease;
+  }
+
+  .header-inner {
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    transition: gap 0.22s ease;
+  }
+
+  .header-title-row {
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    transition: gap 0.22s ease;
+  }
+
+  .header-title-text {
+    align-items: center;
+    text-align: center;
+    transition: opacity 0.22s ease;
+  }
+
+  .header-subtitles {
+    border-left: none;
+    padding-left: 0;
+    border-top: 1px solid var(--border);
+    padding-top: 8px;
+    width: 100%;
+    transition: opacity 0.22s ease, max-height 0.22s ease, margin 0.22s ease, padding 0.22s ease, border-color 0.22s ease;
+    max-height: 120px;
+    opacity: 1;
+    overflow: hidden;
+  }
+
+  .app-header h1 {
+    font-size: 1.5rem;
+    transition: font-size 0.22s ease;
+  }
+
+  .header-tagline {
+    font-size: 0.8rem;
+    transition: opacity 0.22s ease, max-height 0.22s ease, margin 0.22s ease;
+    max-height: 28px;
+    overflow: hidden;
+  }
+
+  .header-icon {
+    width: 36px;
+    height: 36px;
+    transition: width 0.22s ease, height 0.22s ease;
+  }
+
+  .app-header--collapsed {
+    padding: 8px 16px;
+  }
+
+  .app-header--collapsed .header-inner {
+    gap: 2px;
+    align-items: center;
+  }
+
+  .app-header--collapsed .header-title-row {
+    flex-direction: row;
+    gap: 8px;
+    width: fit-content;
+    margin: 0 auto;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .app-header--collapsed .header-title-text {
+    align-items: center;
+    text-align: center;
+  }
+
+  .app-header--collapsed .header-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  .app-header--collapsed h1 {
+    font-size: 1.1rem;
+  }
+
+  .app-header--collapsed .header-tagline,
+  .app-header--collapsed .header-subtitles {
+    opacity: 0;
+    max-height: 0;
+    margin: 0;
+    padding-top: 0;
+    border-top-color: transparent;
+    pointer-events: none;
+  }
+
+  .app-header--collapsed .header-tagline {
+    display: none;
+  }
 }
 
 /* ── Latest Train ── */
