@@ -2,6 +2,7 @@
 set -euo pipefail
 
 BUCKET="midnighttraintacoma.com"
+CLOUDFRONT_DISTRIBUTION_ID="E1UIM51U67N2EE"
 DEPLOY_DIR="deployments"
 
 # Guard: warn if there are uncommitted changes
@@ -33,6 +34,14 @@ npm run build
 
 echo "Deploying to s3://$BUCKET..."
 aws s3 sync dist/ "s3://$BUCKET" --delete --profile train-detection-deploy
+
+echo "Invalidating CloudFront cache..."
+aws cloudfront create-invalidation \
+  --distribution-id "$CLOUDFRONT_DISTRIBUTION_ID" \
+  --paths "/*" \
+  --profile train-detection-deploy \
+  --query 'Invalidation.{Id:Id,Status:Status}' \
+  --output table
 
 echo "Archiving deployed build to $ARCHIVE/..."
 mkdir -p "$ARCHIVE"
