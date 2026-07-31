@@ -29,6 +29,42 @@ export function makePresetRange(preset: Exclude<Preset, 'custom'>): TimeRange {
   };
 }
 
+function shiftRange(range: TimeRange, direction: 'prev' | 'next'): TimeRange {
+  if (range.preset === 'all' || !range.start || !range.end) return range;
+  const s = new Date(range.start).getTime();
+  const e = new Date(range.end).getTime();
+  const delta = (direction === 'prev' ? -1 : 1) * (e - s);
+  return {
+    preset: 'custom',
+    start: new Date(s + delta).toISOString(),
+    end: new Date(e + delta).toISOString(),
+  };
+}
+
+function formatPeriodLabel(start: string | undefined, end: string | undefined, preset: Preset): string {
+  if (preset === 'all' || !start) return 'All Time';
+  const s = new Date(start);
+  const e = end ? new Date(end) : new Date();
+  const durationMs = e.getTime() - s.getTime();
+  const threeDays = 3 * 24 * 60 * 60 * 1000;
+
+  const dateOnly = (d: Date) =>
+    new Intl.DateTimeFormat(undefined, { weekday: 'short', month: 'short', day: 'numeric' }).format(d);
+  const withTime = (d: Date) =>
+    new Intl.DateTimeFormat(undefined, {
+      weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit',
+    }).format(d);
+
+  if (durationMs < threeDays) {
+    return `${withTime(s)} – ${withTime(e)}`;
+  }
+  const sYear = s.getFullYear();
+  const eYear = e.getFullYear();
+  return sYear === eYear
+    ? `${dateOnly(s)} – ${dateOnly(e)}, ${eYear}`
+    : `${dateOnly(s)}, ${sYear} – ${dateOnly(e)}, ${eYear}`;
+}
+
 const PRESETS: { label: string; preset: Preset }[] = [
   { label: '24h', preset: '24h' },
   { label: '3 Days', preset: '3d' },
@@ -52,10 +88,15 @@ export default function GlobalTimeRange({ value, onChange }: Props) {
   const [customEnd, setCustomEnd] = useState(toLocalInput(now));
   const [customError, setCustomError] = useState<string | null>(null);
   const [pendingCustom, setPendingCustom] = useState(value.preset === 'custom');
+  const [displayPreset, setDisplayPreset] = useState<Preset>(value.preset);
 
   function handlePreset(preset: Preset) {
     setCustomError(null);
+    setDisplayPreset(preset);
     if (preset === 'custom') {
+      // Pre-fill inputs with the current range if available
+      if (value.start) setCustomStart(toLocalInput(new Date(value.start)));
+      if (value.end) setCustomEnd(toLocalInput(new Date(value.end)));
       setPendingCustom(true);
       // Don't call onChange yet — wait for Apply
     } else {
@@ -88,8 +129,18 @@ export default function GlobalTimeRange({ value, onChange }: Props) {
     });
   }
 
-  const showCustom = pendingCustom || value.preset === 'custom';
-  const activePreset = pendingCustom ? 'custom' : value.preset;
+  const showCustom = pendingCustom;
+  const activePreset = pendingCustom ? 'custom' : displayPreset;
+
+  function handleShift(direction: 'prev' | 'next') {
+    setPendingCustom(false);
+    setCustomError(null);
+    onChange(shiftRange(value, direction));
+    // displayPreset intentionally not updated — keep the original preset highlighted
+  }
+
+  const canNav = value.preset !== 'all';
+  const atPresent = !value.end || new Date(value.end).getTime() >= Date.now() - 60_000;
 
   return (
     <div className="global-time-range">
@@ -104,6 +155,28 @@ export default function GlobalTimeRange({ value, onChange }: Props) {
           </button>
         ))}
       </div>
+      <div className="global-time-range__nav">
+        <button
+          className="nav-btn"
+          onClick={() => handleShift('prev')}
+          disabled={!canNav}
+          title="Previous period"
+        >
+          ← Prev
+        </button>
+        <span className="nav-period-label">
+          {formatPeriodLabel(value.start, value.end, value.preset)}
+        </span>
+        <button
+          className="nav-btn"
+          onClick={() => handleShift('next')}
+          disabled={!canNav || atPresent}
+          title="Next period"
+        >
+          Next →
+        </button>
+      </div>
+
       {showCustom && (
         <div className="global-time-range__custom">
           <label className="input-group">

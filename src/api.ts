@@ -41,6 +41,12 @@ export async function patchDetection(id: number, isConfirmedTrain: boolean | nul
   return res.json() as Promise<Detection>;
 }
 
+export async function deleteDetection(id: number): Promise<void> {
+  const res = await fetch(`${BASE_URL}/api/detections/${id}`, { method: 'DELETE' });
+  if (res.status === 404) throw new Error('Detection not found');
+  if (!res.ok) throw new Error('Failed to delete detection');
+}
+
 export async function fetchAudioUrl(id: number): Promise<string> {
   const res = await fetch(`${BASE_URL}/api/detections/${id}/audio-url`);
   if (res.status === 404) throw new Error('No audio file for this detection');
