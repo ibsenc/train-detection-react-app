@@ -25,7 +25,11 @@ interface ChartPoint {
 
 function formatXTick(ms: number, days: number): string {
   if (days <= 1) {
-    return new Intl.DateTimeFormat(undefined, { hour: 'numeric' }).format(new Date(ms));
+    const d = new Date(ms);
+    if (d.getHours() === 0) {
+      return new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric', hour: 'numeric' }).format(d);
+    }
+    return new Intl.DateTimeFormat(undefined, { hour: 'numeric' }).format(d);
   }
   if (days <= 7) {
     return new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric', hour: 'numeric' }).format(new Date(ms));

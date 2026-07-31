@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { fetchDetections } from '../api';
+import { deleteDetection, fetchDetections } from '../api';
 import AudioButton from './AudioButton';
+import ConfirmModal from './ConfirmModal';
 import ReviewButtons from './ReviewButtons';
 import type { Detection, DetectionsResponse } from '../types';
 
@@ -32,6 +33,8 @@ export default function TimeRangeQuery({ start, end }: Props) {
   const [results, setResults] = useState<DetectionsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -51,6 +54,20 @@ export default function TimeRangeQuery({ start, end }: Props) {
     setResults(prev =>
       prev ? { ...prev, data: prev.data.map(d => d.id === updated.id ? updated : d) } : prev
     );
+  }
+
+  async function confirmDelete() {
+    if (pendingDeleteId === null) return;
+    setDeletingId(pendingDeleteId);
+    try {
+      await deleteDetection(pendingDeleteId);
+      setResults(prev =>
+        prev ? { ...prev, data: prev.data.filter(d => d.id !== pendingDeleteId), total: prev.total - 1 } : prev
+      );
+      setPendingDeleteId(null);
+    } finally {
+      setDeletingId(null);
+    }
   }
 
   return (
@@ -85,12 +102,31 @@ export default function TimeRangeQuery({ start, end }: Props) {
                     <span className={`status-badge ${statusClass(d)}`}>{statusLabel(d)}</span>
                     {d.audio_url && <AudioButton detectionId={d.id} />}
                   </div>
-                  <ReviewButtons detection={d} onUpdate={handleReview} />
+                  <div className="detection-row__actions">
+                    <ReviewButtons detection={d} onUpdate={handleReview} />
+                    <button
+                      className="review-btn review-btn--delete"
+                      onClick={() => setPendingDeleteId(d.id)}
+                      disabled={deletingId === d.id}
+                      title="Delete this event"
+                    >
+                      {deletingId === d.id ? 'Deleting…' : '🗑 Delete'}
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
           )}
         </div>
+      )}
+
+      {pendingDeleteId !== null && (
+        <ConfirmModal
+          message="Are you sure you want to delete this event?"
+          onConfirm={confirmDelete}
+          onCancel={() => setPendingDeleteId(null)}
+          loading={deletingId !== null}
+        />
       )}
     </div>
   );
