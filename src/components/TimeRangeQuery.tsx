@@ -13,14 +13,16 @@ function formatDateTime(iso: string): string {
 }
 
 function statusLabel(d: Detection): string {
-  if (d.is_confirmed_train === true) return 'Confirmed';
-  if (d.is_confirmed_train === false) return 'Not a Train';
+  if (d.label === 'train') return 'Idle Train';
+  if (d.label === 'train_horn') return 'Train Horn';
+  if (d.label === 'non_train') return 'Not a Train';
   return 'Unknown';
 }
 
 function statusClass(d: Detection): string {
-  if (d.is_confirmed_train === true) return 'status-confirmed';
-  if (d.is_confirmed_train === false) return 'status-false';
+  if (d.label === 'train') return 'status-confirmed';
+  if (d.label === 'train_horn') return 'status-horn';
+  if (d.label === 'non_train') return 'status-false';
   return 'status-suspected';
 }
 
@@ -48,7 +50,7 @@ export default function TimeRangeQuery({ start, end }: Props) {
   }, [start, end]);
 
   const trains = results?.data.filter(d => d.is_suspected_train) ?? [];
-  const confirmed = trains.filter(d => d.is_confirmed_train === true);
+  const confirmed = trains.filter(d => d.label === 'train' || d.label === 'train_horn');
 
   function handleReview(updated: Detection) {
     setResults(prev =>

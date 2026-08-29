@@ -454,6 +454,12 @@
 }
 
 .status-confirmed {
+  background: rgba(96, 165, 250, 0.15);
+  color: var(--blue);
+  border: 1px solid rgba(96, 165, 250, 0.3);
+}
+
+.status-horn {
   background: rgba(74, 222, 128, 0.15);
   color: var(--green);
   border: 1px solid rgba(74, 222, 128, 0.3);
@@ -656,11 +662,21 @@
 .review-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .review-btn--confirm {
-  border: 1px solid rgba(74, 222, 128, 0.35);
-  color: var(--green);
+  border: 1px solid rgba(96, 165, 250, 0.35);
+  color: var(--blue);
 }
 .review-btn--confirm:hover:not(:disabled),
 .review-btn--confirm.active {
+  background: rgba(96, 165, 250, 0.15);
+  border-color: var(--blue);
+}
+
+.review-btn--horn {
+  border: 1px solid rgba(74, 222, 128, 0.35);
+  color: var(--green);
+}
+.review-btn--horn:hover:not(:disabled),
+.review-btn--horn.active {
   background: rgba(74, 222, 128, 0.15);
   border-color: var(--green);
 }

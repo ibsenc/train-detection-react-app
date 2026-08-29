@@ -91,14 +91,16 @@ function formatDateTime(iso: string): string {
 }
 
 function statusLabel(d: Detection): string {
-  if (d.is_confirmed_train === true) return 'Confirmed';
-  if (d.is_confirmed_train === false) return 'Not a Train';
+  if (d.label === 'train') return 'Idle Train';
+  if (d.label === 'train_horn') return 'Train Horn';
+  if (d.label === 'non_train') return 'Not a Train';
   return 'Unknown';
 }
 
 function statusClass(d: Detection): string {
-  if (d.is_confirmed_train === true) return 'status-confirmed';
-  if (d.is_confirmed_train === false) return 'status-false';
+  if (d.label === 'train') return 'status-confirmed';
+  if (d.label === 'train_horn') return 'status-horn';
+  if (d.label === 'non_train') return 'status-false';
   return 'status-suspected';
 }
 
@@ -161,6 +163,7 @@ export default function DetectionChart({ start, end }: DetectionChartProps) {
   const normal: ChartPoint[] = [];
   const suspected: ChartPoint[] = [];
   const confirmed: ChartPoint[] = [];
+  const trainHorn: ChartPoint[] = [];
   const falsePositive: ChartPoint[] = [];
 
   for (const d of detections) {
@@ -173,8 +176,9 @@ export default function DetectionChart({ start, end }: DetectionChartProps) {
       id: d.id,
       source: d.source ?? 'unknown',
     };
-    if (d.is_confirmed_train === true) confirmed.push(point);
-    else if (d.is_confirmed_train === false) falsePositive.push(point);
+    if (d.label === 'train') confirmed.push(point);
+    else if (d.label === 'train_horn') trainHorn.push(point);
+    else if (d.label === 'non_train') falsePositive.push(point);
     else if (d.is_suspected_train) suspected.push(point);
     else normal.push(point);
   }
@@ -240,15 +244,10 @@ export default function DetectionChart({ start, end }: DetectionChartProps) {
                 {normal.length > 0 && (
                   <Scatter name="Event" data={normal} fill="#475569" opacity={0.7} onClick={handleDotClick} />
                 )}
-                {suspected.length > 0 && (
-                  <Scatter name="Unknown" data={suspected} fill="#f59e0b" opacity={0.9} onClick={handleDotClick} />
-                )}
-                {confirmed.length > 0 && (
-                  <Scatter name="Confirmed Train" data={confirmed} fill="#4ade80" onClick={handleDotClick} />
-                )}
-                {falsePositive.length > 0 && (
-                  <Scatter name="Not a Train" data={falsePositive} fill="#f87171" opacity={0.7} onClick={handleDotClick} />
-                )}
+                <Scatter name="Train Horn" data={trainHorn} fill="#4ade80" onClick={handleDotClick} />
+                <Scatter name="Idle Train" data={confirmed} fill="#60a5fa" onClick={handleDotClick} />
+                <Scatter name="Not a Train" data={falsePositive} fill="#f87171" opacity={0.7} onClick={handleDotClick} />
+                <Scatter name="Unknown" data={suspected} fill="#f59e0b" opacity={0.9} onClick={handleDotClick} />
               </ScatterChart>
             </ResponsiveContainer>
           )}

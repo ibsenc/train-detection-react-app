@@ -45,8 +45,9 @@ export default function StatsPanel({ start, end }: StatsPanelProps) {
   return (
     <section className="stats-panel">
       <StatCard label="Total Events" value={stats.total_events} />
-      <StatCard label="Confirmed Trains" value={stats.confirmed_trains} highlight />
-      <StatCard label="Non-Train Events" value={stats.confirmed_false_positives} />
+      <StatCard label="Train Horns" value={stats.confirmed_train_horns ?? 0} highlight />
+      <StatCard label="All Trains" value={stats.confirmed_trains} />
+      <StatCard label="Non-Trains" value={stats.confirmed_false_positives} />
       <StatCard label="Not Reviewed or Unknown" value={stats.unreviewed_suspected} />
       <StatCard label="Avg dB" value={isNaN(parseFloat(stats.avg_decibels)) ? '0.0 dB' : `${parseFloat(stats.avg_decibels).toFixed(1)} dB`} />
       <StatCard label="Max dB" value={isNaN(parseFloat(stats.max_decibels)) ? '0.0 dB' : `${parseFloat(stats.max_decibels).toFixed(1)} dB`} />

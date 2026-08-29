@@ -14,7 +14,7 @@ export async function fetchStats(source?: string, start?: string, end?: string):
 }
 
 export async function fetchLatestConfirmed(): Promise<Detection> {
-  const res = await fetch(`${BASE_URL}/api/detections/latest?confirmed_only=true`);
+  const res = await fetch(`${BASE_URL}/api/detections/latest?label=train_horn`);
   if (res.status === 404) throw new Error('No detections found');
   if (!res.ok) throw new Error('Failed to fetch latest detection');
   return res.json() as Promise<Detection>;
@@ -25,16 +25,17 @@ export interface FetchDetectionsParams {
   end?: string;
   min_db?: number;
   confirmed_only?: boolean;
+  label?: string;
   source?: string;
   limit?: number;
   offset?: number;
 }
 
-export async function patchDetection(id: number, isConfirmedTrain: boolean | null): Promise<Detection> {
+export async function patchDetection(id: number, label: string): Promise<Detection> {
   const res = await fetch(`${BASE_URL}/api/detections/${id}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ is_confirmed_train: isConfirmedTrain }),
+    body: JSON.stringify({ label }),
   });
   if (res.status === 404) throw new Error('Detection not found');
   if (!res.ok) throw new Error('Failed to update detection');
@@ -61,6 +62,7 @@ export async function fetchDetections(params: FetchDetectionsParams = {}): Promi
   if (params.end) query.set('end', params.end);
   if (params.min_db !== undefined) query.set('min_db', String(params.min_db));
   if (params.confirmed_only !== undefined) query.set('confirmed_only', String(params.confirmed_only));
+  if (params.label) query.set('label', params.label);
   if (params.source) query.set('source', params.source);
   if (params.limit !== undefined) query.set('limit', String(params.limit));
   if (params.offset !== undefined) query.set('offset', String(params.offset));

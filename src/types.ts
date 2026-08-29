@@ -6,7 +6,7 @@ export interface Detection {
   source: string | null;
   audio_url: string | null;
   is_suspected_train: boolean;
-  is_confirmed_train: boolean | null;
+  label: 'train' | 'train_horn' | 'non_train' | 'unknown';
   created_at: string;
 }
 
@@ -21,8 +21,11 @@ export interface Stats {
   total_events: number;
   suspected_trains: number;
   confirmed_trains: number;
+  confirmed_train_horns: number;
   confirmed_false_positives: number;
   unreviewed_suspected: number;
+  suspected_last_24h: number;
+  suspected_last_7d: number;
   last_suspected_at: string | null;
   last_confirmed_at: string | null;
   avg_decibels: string;
