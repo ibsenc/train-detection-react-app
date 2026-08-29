@@ -11,12 +11,12 @@ export default function ReviewButtons({ detection, onUpdate }: ReviewButtonsProp
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function submit(value: boolean | null) {
-    if (detection.is_confirmed_train === value) return;
+  async function submit(label: string) {
+    if (detection.label === label) return;
     setLoading(true);
     setError(null);
     try {
-      const updated = await patchDetection(detection.id, value);
+      const updated = await patchDetection(detection.id, label);
       onUpdate(updated);
     } catch (e) {
       setError((e as Error).message);
@@ -25,29 +25,37 @@ export default function ReviewButtons({ detection, onUpdate }: ReviewButtonsProp
     }
   }
 
-  const val = detection.is_confirmed_train;
+  const lbl = detection.label;
 
   return (
     <div className="review-buttons">
       <button
-        className={`review-btn review-btn--confirm${val === true ? ' active' : ''}`}
-        onClick={() => submit(true)}
+        className={`review-btn review-btn--horn${lbl === 'train_horn' ? ' active' : ''}`}
+        onClick={() => submit('train_horn')}
         disabled={loading}
-        title="Confirm as train"
+        title="Confirm as train horn"
       >
-        ✓ Train
+        📣 Train Horn
       </button>
       <button
-        className={`review-btn review-btn--deny${val === false ? ' active' : ''}`}
-        onClick={() => submit(false)}
+        className={`review-btn review-btn--confirm${lbl === 'train' ? ' active' : ''}`}
+        onClick={() => submit('train')}
+        disabled={loading}
+        title="Confirm as idle train"
+      >
+        ✓ Idle Train
+      </button>
+      <button
+        className={`review-btn review-btn--deny${lbl === 'non_train' ? ' active' : ''}`}
+        onClick={() => submit('non_train')}
         disabled={loading}
         title="Mark as not a train"
       >
         ✗ Not a Train
       </button>
       <button
-        className={`review-btn review-btn--unknown${val === null ? ' active' : ''}`}
-        onClick={() => submit(null)}
+        className={`review-btn review-btn--unknown${lbl === 'unknown' ? ' active' : ''}`}
+        onClick={() => submit('unknown')}
         disabled={loading}
         title="Reset to unknown"
       >

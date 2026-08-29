@@ -24,14 +24,16 @@ function formatDateTime(iso: string): string {
 }
 
 function statusLabel(d: Detection): string {
-  if (d.is_confirmed_train === true) return 'Confirmed';
-  if (d.is_confirmed_train === false) return 'Not a Train';
+  if (d.label === 'train') return 'Idle Train';
+  if (d.label === 'train_horn') return 'Train Horn';
+  if (d.label === 'non_train') return 'Not a Train';
   return 'Unknown';
 }
 
 function statusClass(d: Detection): string {
-  if (d.is_confirmed_train === true) return 'status-confirmed';
-  if (d.is_confirmed_train === false) return 'status-false';
+  if (d.label === 'train') return 'status-confirmed';
+  if (d.label === 'train_horn') return 'status-horn';
+  if (d.label === 'non_train') return 'status-false';
   return 'status-suspected';
 }
 
@@ -51,7 +53,7 @@ export default function LatestTrain() {
 
   return (
     <div className="latest-train card">
-      <h2 className="section-title">Last Confirmed Train</h2>
+      <h2 className="section-title">Last Confirmed Train Horn</h2>
       {loading && <p className="panel-placeholder">Loading…</p>}
       {(error || (!loading && !detection)) && (
         <p className="no-data">No detections found</p>
